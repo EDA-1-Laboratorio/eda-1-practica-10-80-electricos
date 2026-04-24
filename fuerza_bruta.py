@@ -53,7 +53,7 @@ def buscar_cadena_objetivo(objetivo: str, alfabeto: str,
     for longitud in range(min_len, len(objetivo) + 1):
         for candidato in generar_candidatos(alfabeto, longitud):
             # TODO: incrementa intentos
-            intentos=+1
+            intentos+=1
             # TODO: si candidato == objetivo, calcula el tiempo y retorna
             #       (True, intentos, tiempo)
             if candidato==objetivo:
@@ -62,7 +62,7 @@ def buscar_cadena_objetivo(objetivo: str, alfabeto: str,
 
 
     tiempo = time.perf_counter() - inicio
-    return (False, intentos, tiempo)
+    return (False,intentos,tiempo)
 
 
 # ---------------------------------------------------------------------------
@@ -80,7 +80,8 @@ def combinar_teoricas(alfabeto: str, min_len: int, max_len: int) -> int:
         len(alfabeto) da |Σ|.
     """
     # TODO: implementa la fórmula
-    pass
+    sigma=len(alfabeto)
+    return sum(sigma**k for k in range(min_len, max_len +1))
 
 
 # ---------------------------------------------------------------------------
@@ -110,9 +111,18 @@ def buscar_con_poda(objetivo: str, alfabeto: str,
 
             # TODO: verifica los prefijos; si alguno no está en
             #       prefijos_validos, usa 'continue' para saltar.
-
+            valido=True
+            for k in range(1,longitud):
+                if candidato[:k] not in prefijos_validos:
+                    valido=False
+                    break
+                if not valido:
+                    continue
             # TODO: incrementa intentos y compara con objetivo.
-            pass
+            intentos+=1
+            if candidato==objetivo:
+                tiempo=time.perf_counter()-inicio
+                return(True,intentos,tiempo)
 
     tiempo = time.perf_counter() - inicio
     return (False, intentos, tiempo)
