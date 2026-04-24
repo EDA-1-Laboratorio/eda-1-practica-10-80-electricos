@@ -57,11 +57,25 @@ def cambio_optimo_dp(monto: int, monedas: list) -> tuple | None:
         Guarda padre[i] = m que produjo dp[i] para reconstruir la solución.
     """
     # TODO: crea la tabla dp y la tabla padre con longitud monto + 1.
+    dp = [float(`inf´)]*(monto + 1)
+    padre = [-1]*(monto + 1)
+    dp [0]= 0
     # TODO: llena la tabla recorriendo cada monto parcial de 1 a monto.
+    for i in range (1, monto + 1):
+        for m in monedas:
+            if m <= i and dp[i - m]+1 < dp[i]:
+                padre[i] = m
     # TODO: si dp[monto] es inf, retorna None.
+    if dp [monto] == float(`inf´):
+        retun None
     # TODO: reconstruye la lista de monedas usando padre[].
-    pass
-
+    usadas = [] 
+    actual = monto
+    while actual > 0:
+        moneda = padre[actual]
+        usadas.append(moneda)
+        actual-=moneda
+        return (usadas, len (usadas))
 
 # ---------------------------------------------------------------------------
 # Problema C – Comparación: contraejemplos
