@@ -33,7 +33,9 @@ def generar_candidatos(alfabeto: str, longitud: int):
         "".join(tupla) convierte una tupla en cadena.
     """
     # TODO: implementa con itertools.product y yield o return del iterador
-    pass
+    for tupla in itertools.product(alfabeto, repeat=longitud):
+        yield "".join(tupla)
+
 
 
 def buscar_cadena_objetivo(objetivo: str, alfabeto: str,
@@ -51,9 +53,13 @@ def buscar_cadena_objetivo(objetivo: str, alfabeto: str,
     for longitud in range(min_len, len(objetivo) + 1):
         for candidato in generar_candidatos(alfabeto, longitud):
             # TODO: incrementa intentos
+            intentos=+1
             # TODO: si candidato == objetivo, calcula el tiempo y retorna
             #       (True, intentos, tiempo)
-            pass
+            if candidato==objetivo:
+                tiempo=time.perf_counter()-inicio
+                return(True,intentos,tiempo)
+
 
     tiempo = time.perf_counter() - inicio
     return (False, intentos, tiempo)
