@@ -30,30 +30,27 @@ def cambio_greedy(monto: int, monedas: list) -> tuple | None:
         cantidad = restante // moneda  (cuántas caben)
         restante = restante % moneda   (lo que sobra)
     """
-   # TODO: 1. Ordena las monedas de mayor a menor.
-    monedas_ordenadas = sort(monedas,reverse = true)
+    # TODO: 1. Ordena las monedas de mayor a menor.
+    monedas_ordenadas = sorted(monedas, reverse=True)
     
     # TODO: 2. Para cada denominación, toma tantas monedas como quepan.
     usadas = []
     restante = monto
-    monedas = 0
-    for monedas in monedas_ordenadas:
-        cantidad = monedas // restante
+    total_monedas = 0
+    
+    for moneda in monedas_ordenadas:
+        cantidad = restante // moneda
         if cantidad > 0:
-            usadas.extend([monedas] * cantidad)
+            usadas.extend([moneda] * cantidad)
             total_monedas += cantidad
             restante = restante % moneda
-        
     
     # TODO: 3. Si el residuo final es 0, retorna (lista_de_monedas_usadas, total).
-   
-    
     # TODO: 4. Si queda residuo, retorna None.
-     if restante == 0:
-         return (usadas,total_monedas)
-         else:
-             return None
-
+    if restante == 0:
+        return (usadas, total_monedas)
+    else:
+        return None
 
 
 # ---------------------------------------------------------------------------
@@ -76,25 +73,33 @@ def cambio_optimo_dp(monto: int, monedas: list) -> tuple | None:
         Guarda padre[i] = m que produjo dp[i] para reconstruir la solución.
     """
     # TODO: crea la tabla dp y la tabla padre con longitud monto + 1.
-    dp = [float(`inf´)]*(monto + 1)
-    padre = [-1]*(monto + 1)
-    dp [0]= 0
+    dp = [float('inf')] * (monto + 1)
+    padre = [None] * (monto + 1)
+    
+    dp[0] = 0
+    
     # TODO: llena la tabla recorriendo cada monto parcial de 1 a monto.
-    for i in range (1, monto + 1):
-        for m in monedas:
-            if m <= i and dp[i - m]+1 < dp[i]:
-                padre[i] = m
+    for i in range(1, monto + 1):
+        for moneda in monedas:
+            if moneda <= i:
+                if dp[i - moneda] + 1 < dp[i]:
+                    dp[i] = dp[i - moneda] + 1
+                    padre[i] = moneda
+    
     # TODO: si dp[monto] es inf, retorna None.
-    if dp [monto] == float(`inf´):
-        retun None
+    if dp[monto] == float('inf'):
+        return None
+    
     # TODO: reconstruye la lista de monedas usando padre[].
-    usadas = [] 
-    actual = monto
-    while actual > 0:
-        moneda = padre[actual]
+    usadas = []
+    restante = monto
+    while restante > 0:
+        moneda = padre[restante]
         usadas.append(moneda)
-        actual-=moneda
-        return (usadas, len (usadas))
+        restante -= moneda
+    
+    return (usadas, dp[monto])
+
 
 # ---------------------------------------------------------------------------
 # Problema C – Comparación: contraejemplos
@@ -113,21 +118,23 @@ def comparar_estrategias(monto_max: int, monedas: list) -> dict:
     # TODO: itera los montos, llama a cambio_greedy y cambio_optimo_dp.
     montos_greedy_falla = []
     montos_greedy_suboptimo = []
+    
     for monto in range(1, monto_max + 1):
         resultado_greedy = cambio_greedy(monto, monedas)
-        resultado_dp = cambio_optimo_dp(monto,monedas)
+        resultado_dp = cambio_optimo_dp(monto, monedas)
+        
     # TODO: clasifica cada caso y acumula en las listas correspondientes.
-    if resultado_dp is not None and resultado_greedy is not None:
-        montos_greedy_falla.append(monto)
+        if resultado_dp is not None and resultado_greedy is None:
+            montos_greedy_falla.append(monto)
         elif resultado_greedy is not None and resultado_dp is not None:
-            total_greedy = resultado_greedy [1]
-            total_dp = resultado_dp [1]
+            total_greedy = resultado_greedy[1]
+            total_dp = resultado_dp[1]
             if total_greedy > total_dp:
                 montos_greedy_suboptimo.append((monto, total_greedy, total_dp))
+    
     return {
         'montos_greedy_falla': montos_greedy_falla,
         'montos_greedy_suboptimo': montos_greedy_suboptimo
-        }
     }
 
 
