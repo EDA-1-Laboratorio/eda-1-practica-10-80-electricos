@@ -33,7 +33,9 @@ def generar_candidatos(alfabeto: str, longitud: int):
         "".join(tupla) convierte una tupla en cadena.
     """
     # TODO: implementa con itertools.product y yield o return del iterador
-    pass
+    for tupla in itertools.product(alfabeto, repeat=longitud):
+        yield "".join(tupla)
+
 
 
 def buscar_cadena_objetivo(objetivo: str, alfabeto: str,
@@ -51,12 +53,16 @@ def buscar_cadena_objetivo(objetivo: str, alfabeto: str,
     for longitud in range(min_len, len(objetivo) + 1):
         for candidato in generar_candidatos(alfabeto, longitud):
             # TODO: incrementa intentos
+            intentos+=1
             # TODO: si candidato == objetivo, calcula el tiempo y retorna
             #       (True, intentos, tiempo)
-            pass
+            if candidato==objetivo:
+                tiempo=time.perf_counter()-inicio
+                return(True,intentos,tiempo)
+
 
     tiempo = time.perf_counter() - inicio
-    return (False, intentos, tiempo)
+    return (False,intentos,tiempo)
 
 
 # ---------------------------------------------------------------------------
@@ -74,7 +80,8 @@ def combinar_teoricas(alfabeto: str, min_len: int, max_len: int) -> int:
         len(alfabeto) da |Σ|.
     """
     # TODO: implementa la fórmula
-    pass
+    sigma=len(alfabeto)
+    return sum(sigma**k for k in range(min_len, max_len +1))
 
 
 # ---------------------------------------------------------------------------
@@ -104,9 +111,18 @@ def buscar_con_poda(objetivo: str, alfabeto: str,
 
             # TODO: verifica los prefijos; si alguno no está en
             #       prefijos_validos, usa 'continue' para saltar.
-
+            valido=True
+            for k in range(1,len(candidato)):
+                if candidato[:k] not in prefijos_validos:
+                    valido=False
+                    break
+            if not valido:
+                continue
             # TODO: incrementa intentos y compara con objetivo.
-            pass
+            intentos+=1
+            if candidato==objetivo:
+                tiempo=time.perf_counter()-inicio
+                return(True,intentos,tiempo)
 
     tiempo = time.perf_counter() - inicio
     return (False, intentos, tiempo)
@@ -114,9 +130,9 @@ def buscar_con_poda(objetivo: str, alfabeto: str,
 
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
-    objetivo = "az"
+    objetivo = "Sl2"
     print("=== Búsqueda por fuerza bruta ===")
-    encontrada, intentos, t = buscar_cadena_objetivo(objetivo, MINUSCULAS)
+    encontrada, intentos, t = buscar_cadena_objetivo(objetivo, ALNUM)
     if encontrada:
         print(f"  Objetivo : '{objetivo}'")
         print(f"  Intentos : {intentos}")
@@ -127,9 +143,49 @@ if __name__ == "__main__":
 
     print("\n=== Combinaciones teóricas ===")
     for max_len in [3, 4]:
-        n = combinar_teoricas(DIGITOS, 1, max_len)
+        n = combinar_teoricas(ALNUM, 1, max_len)
         if n is not None:
-            print(f"  Dígitos hasta longitud {max_len}: {n:,} candidatos")
+            print(f"  ALNUM (A-Z, a-z, 0-9) hasta longitud {max_len}: {n:,} candidatos")
         else:
             print("  combinar_teoricas aún no implementada")
         break
+#------------
+print("=== Problema B ===")
+
+for alfabeto, nombre in [(DIGITOS, "Dígitos"), (MINUSCULAS, "Minúsculas")]:
+    for n in [3, 4, 5]:
+        teoricas = combinar_teoricas(alfabeto, 1, n)
+
+        objetivo = alfabeto[-1] * n   # peor caso
+        encontrada, intentos, t = buscar_cadena_objetivo(objetivo, alfabeto)
+
+        print(nombre, n, teoricas, f"{t:.4f}s")
+#-------------
+print("=== Problema C ===")
+objetivo = "datos"
+alfabeto = MINUSCULAS
+prefijos = {"d", "da", "dat", "dato"}
+# Sin poda
+_, intentos1, t1 = buscar_cadena_objetivo(objetivo, alfabeto)
+# Con poda
+_, intentos2, t2 = buscar_con_poda(objetivo, alfabeto, prefijos)
+reduccion = ((t1 - t2) / t1) * 100
+print("Objetivo: datos")
+print("Prefijos: 'd','da','dat','dato'")
+print(f"Sin poda: {t1:.4f}s")
+print(f"Con poda: {t2:.4f}s")
+print(f"Intentos sin poda: {intentos1}")
+print(f"Intentos con poda: {intentos2}")
+print(f"Reducción %: {reduccion:.2f}%")
+#-----------
+print("=== Problema D.1 ===")
+prev = None
+for n in range(1, 6):
+    objetivo = "9" * n
+    _, intentos, t = buscar_cadena_objetivo(objetivo, DIGITOS)
+    razon = t / prev if prev else None
+    if razon is None:
+        print(n, intentos, f"{t:.4f}s", "—")
+    else:
+        print(n, intentos, f"{t:.4f}s", f"{razon:.2f}")
+    prev = t
